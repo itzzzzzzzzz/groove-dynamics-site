@@ -1,0 +1,1915 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Groove Dynamics</title>
+<meta name="description" content="Groove Dynamics — Aram Sepehri.">
+<meta name="theme-color" content="#FAFAFA">
+<script>
+/* One address for the whole site: the start page answers to it, and so
+   does the Inner Circle (src/app/06-script.html), which keeps where you
+   are in its history instead of in the address. So a reload while you
+   were in the Inner Circle lands here and is sent back to where you were,
+   and a link into it with its page after a # opens it there. */
+(function () {
+  var home = location.pathname.replace(/[^/]*$/, '');
+  try {
+    if (/^#\//.test(location.hash)) { document.documentElement.style.display = 'none'; location.replace(home + 'app.html' + location.search + location.hash); return; }
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'reload' && sessionStorage.getItem('gd.at')) {
+      sessionStorage.setItem('gd.again', '1');
+      document.documentElement.style.display = 'none';
+      location.replace(home + 'app.html' + location.search);
+      return;
+    }
+    sessionStorage.removeItem('gd.at');
+    addEventListener('pageshow', function (e) { if (e.persisted) try { sessionStorage.removeItem('gd.at'); } catch (x) {} });
+  } catch (e) {}
+  if (location.pathname !== home || location.hash) history.replaceState(history.state, '', home + location.search);
+  /* the same link followed while the start page is already open */
+  addEventListener('hashchange', function () { if (/^#\//.test(location.hash)) location.replace(home + 'app.html' + location.search + location.hash); });
+})();
+</script>
+
+<script>
+/* The page keeps to itself: no menu on the right button, nothing dragged
+   off it, selected or copied out of it (what you type stays yours), and the
+   console says one thing only — who made it. With ?debug in the address the
+   console is left as it is, for finding faults. */
+(function () {
+  if (!/[?&]debug\b/.test(location.search)) {
+    var c = window.console, quiet = function () {};
+    try { c.log('%cGemacht von Georg', 'font:600 12px/1.8 "Inter Tight",system-ui,sans-serif;color:#0a0a0a'); } catch (e) {}
+    ['log', 'info', 'warn', 'error', 'debug', 'trace', 'dir', 'dirxml', 'table', 'group', 'groupCollapsed', 'groupEnd',
+     'time', 'timeEnd', 'timeLog', 'count', 'countReset', 'assert', 'clear', 'profile', 'profileEnd', 'timeStamp'].forEach(function (k) {
+      try { c[k] = quiet; } catch (e) {}
+    });
+    /* an error nobody caught is handled here, so it is not written out either */
+    addEventListener('error', function (e) { e.preventDefault(); }, true);
+    addEventListener('unhandledrejection', function (e) { e.preventDefault(); });
+  }
+  function typing(t) { return !!(t && t.closest && t.closest('input,textarea,select,[contenteditable]:not([contenteditable="false"])')); }
+  addEventListener('contextmenu', function (e) { e.preventDefault(); }, true);
+  addEventListener('dragstart', function (e) { if (!typing(e.target)) e.preventDefault(); }, true);
+  addEventListener('selectstart', function (e) { if (!typing(e.target)) e.preventDefault(); }, true);
+  ['copy', 'cut'].forEach(function (type) {
+    addEventListener(type, function (e) { if (!typing(e.target)) e.preventDefault(); }, true);
+  });
+})();
+</script>
+<style>
+html{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+img,svg,a,canvas{-webkit-user-drag:none}
+input,textarea,select,[contenteditable]:not([contenteditable="false"]){-webkit-user-select:text;user-select:text}
+</style>
+
+<link rel="icon" href="data:,">
+<script>
+/* Phones and tablets: not yet. In place of the page a cross and two words,
+   and nothing after this point is read, so nothing else loads either. */
+(function () {
+  var ua = navigator.userAgent || '';
+  var handheld = /Android|iPhone|iPad|iPod|Mobile|Silk|Kindle|BlackBerry|Opera Mini|IEMobile/i.test(ua) ||
+    (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ||
+    (!!window.matchMedia && matchMedia('(hover: none) and (pointer: coarse)').matches);
+  if (!handheld) return;
+  document.write('<style>html,body{margin:0;height:100%;background:#fff}body{display:grid;place-items:center;' +
+    'font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}' +
+    'body>:not(.na){display:none!important}.na{display:flex;flex-direction:column;align-items:center;gap:18px;color:#0a0a0a}' +
+    '.na svg{width:40px;height:40px}.na p{margin:0;font-size:15px;font-weight:500;letter-spacing:-.01em}</style>' +
+    '<div class="na" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" aria-hidden="true">' +
+    '<path d="M5 5l14 14M19 5L5 19"/></svg><p>Nicht verfügbar</p></div>');
+  window.stop();
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root{
+  --paper:#FFFFFF;   /* one white — every component uses this and nothing else */
+  --ink:#0A0A0A;
+  --ink-2:rgba(10,10,10,.56);
+  --ink-3:rgba(10,10,10,.34);
+  --line:rgba(10,10,10,.12);
+  --pad:clamp(20px,4.2vw,64px);
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --e-io:cubic-bezier(.76,0,.24,1);
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --sans:"Inter Tight","Inter",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  /* clip, never hidden — overflow-x:hidden would make body a scroll container
+     and break every position:sticky inside it */
+  /* clip, never hidden — overflow-x:hidden would make body a scroll container */
+  overflow-x:clip; overscroll-behavior-y:none; scrollbar-width:none;
+}
+html{scrollbar-width:none}
+body::-webkit-scrollbar,html::-webkit-scrollbar{width:0;height:0;display:none}
+body.is-loading{overflow:hidden}
+svg{display:block}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+::selection{background:var(--ink);color:var(--paper)}
+
+.meta{font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-3)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;animation-iteration-count:1 !important;
+    transition-duration:.001ms !important}
+}
+
+
+/* ============================================================
+   the stage — nothing scrolls natively. The wheel moves a number
+   and the script lays the scenes out from it (src/stage/stage.js).
+   ============================================================ */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+.deck{position:fixed;inset:0;overflow:hidden;background:var(--paper);z-index:1;
+  touch-action:none;user-select:none;-webkit-user-select:none}
+.panel{position:absolute;inset:0;opacity:0;visibility:hidden;background:var(--paper);
+  will-change:transform,clip-path;backface-visibility:hidden}
+.panel.is-live{visibility:visible}
+
+/* "Loslegen" does not leave for another site any more: the page clears to
+   white and the Inner Circle opens on the same white */
+@view-transition{navigation:auto}
+html.is-leaving .deck{opacity:0;transition:opacity .5s var(--e-io)}
+
+/* ============================================================
+   loader — white, one very small mark, nothing else
+   ============================================================ */
+#pre{position:fixed;inset:0;z-index:100;background:var(--paper);
+  display:grid;place-items:center;pointer-events:none}
+.pre-mark{width:34px;color:var(--ink);animation:pre-pulse 1.6s var(--e-io) infinite}
+@keyframes pre-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+
+
+/* ============================================================
+   01 · tilted grid hero (ruixen.ui, 21st.dev)
+   One row of pictures streams round the inside of a cylinder:
+   flat in the middle, bent toward you at the ends, faded out at
+   the edges. A headline above it, one line below.
+   ============================================================ */
+.tilt{position:absolute;inset:0;overflow:hidden;background:var(--paper);container-type:size}
+.tilt__band{position:absolute;inset:0;pointer-events:none;opacity:0;
+  transition:opacity .5s cubic-bezier(.4,0,.2,1)}
+.tilt__band.is-laid{opacity:1}
+.tilt__tile{position:absolute;transform-style:preserve-3d}
+.tilt.is-off .tilt__tile{animation-play-state:paused}
+.tilt__strip{position:absolute;top:0;overflow:hidden;background:#f5f5f5}
+.tilt__strip:first-child{border-radius:.5rem 0 0 .5rem}
+.tilt__strip:last-child{border-radius:0 .5rem .5rem 0}
+.tilt__strip img{position:absolute;top:0;max-width:none;object-fit:cover;display:block}
+.tilt__copy{position:relative;z-index:10;display:flex;height:100%;flex-direction:column;
+  align-items:center;justify-content:space-between;padding-block:3rem;text-align:center}
+.tilt__copy h1{margin:0;padding-inline:1.5rem;font-size:2.25rem;line-height:2.5rem;font-weight:500;
+  letter-spacing:-.025em;text-wrap:balance;color:var(--ink)}
+@media (min-width:640px){.tilt__copy h1{font-size:3rem;line-height:1}}
+.tilt__copy p{margin:0;max-width:28rem;padding-inline:1.5rem;font-size:.875rem;line-height:1.25rem;
+  text-wrap:balance;color:var(--ink-2)}
+
+/* ============================================================
+   02 · the ice, and the fall through the rings
+   One canvas, igloo's two scenes. Above it only what igloo does
+   not carry: the three paragraphs between the rings, and the one
+   button where the fall ends.
+   ============================================================ */
+/* the canvas opens over the hero under it. It makes its own cut, so the panel
+   is never clipped or slid — and is not promoted for it: a WebGL canvas inside
+   a promoted, back-face-culled box is a thing some phones will not paint */
+.panel[data-panel="ice"]{background:none;will-change:auto;backface-visibility:visible}
+.words{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;color:var(--ink)}
+/* the browser sets the paragraphs so they break like any text; the script
+   reads where each letter fell and the ice hangs them in its picture */
+.words__line{position:absolute;inset:0;display:grid;place-items:center;
+  visibility:hidden;padding-inline:var(--pad)}
+/* a device that cannot build the ice: a white panel, and the paragraphs as text */
+.panel[data-panel="ice"].is-plain{background:var(--paper)}
+.is-plain .words__line{visibility:visible;opacity:0}
+.words__p{position:relative;width:min(84vw,40rem);text-align:center;margin:0;
+  font-size:clamp(1.2rem,4.2vw,2.5rem);font-weight:600;line-height:1.1;
+  letter-spacing:-.035em}
+.words__go{position:absolute;left:0;right:0;top:50%;display:grid;place-items:center;
+  opacity:0;visibility:hidden;transform:translateY(calc(-50% + 14px));
+  transition:opacity .9s var(--e-out),transform .9s var(--e-out),visibility 0s linear .9s}
+.words__go.is-on{opacity:1;visibility:visible;transform:translateY(-50%);
+  transition:opacity .9s var(--e-out),transform .9s var(--e-out),visibility 0s}
+/* the way on: one ink pill on the white the fall ends in, the arrow in a
+   round of paper that it passes through when the pointer comes */
+.go{display:inline-flex;align-items:center;gap:18px;pointer-events:auto;
+  height:54px;padding:0 7px 0 28px;border-radius:999px;
+  background:var(--ink);color:var(--paper);text-decoration:none;
+  font-size:15px;font-weight:500;letter-spacing:-.01em;line-height:1;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 12px 28px -16px rgba(10,10,10,.55);
+  transition:transform .6s var(--e-out),box-shadow .6s var(--e-out)}
+.go__arrow{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;
+  background:var(--paper);color:var(--ink);overflow:hidden}
+.go__arrow svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;
+  stroke-linecap:round;stroke-linejoin:round}
+.go:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 18px 34px -16px rgba(10,10,10,.6)}
+.go:hover .go__arrow svg{animation:go-through .7s var(--e-out)}
+@keyframes go-through{0%{transform:none}45%{transform:translateX(150%)}46%{transform:translateX(-150%)}100%{transform:none}}
+.go:active{transform:scale(.98)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+</style>
+</head>
+<body class="is-loading">
+<script>/*__gdBoot*/document.documentElement.lang="de";document.body.classList.add("is-loading");</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="gd" viewBox="0 0 1000 576"><path fill="currentColor" d="M274.0 1.0L558.8 0.5L561.3 4.9L499.0 109.3L284.3 109.3L256.9 112.3L223.5 121.1L197.1 133.8L164.7 157.4L149.5 173.5L128.9 203.9L113.2 242.2L108.3 274.5L110.3 319.6L120.1 354.9L137.7 387.3L164.7 419.1L190.2 438.7L228.4 457.4L267.6 466.2L403.4 464.7L473.0 346.1L279.4 343.6L321.1 268.6L336.3 248.5L655.9 247.5L661.3 252.0L467.6 575.0L267.6 575.0L224.5 569.1L173.5 552.5L129.4 528.9L77.9 485.3L63.2 468.6L35.8 427.5L16.2 383.3L5.4 346.1L1.5 318.6L2.5 247.1L8.3 216.7L21.1 178.4L49.5 126.5L91.2 77.9L142.2 39.7L207.8 11.3L244.1 3.4ZM630.9 1.0L721.6 0.5L755.9 3.4L802.9 15.2L854.9 38.7L903.9 75.0L940.7 114.7L967.2 156.9L986.8 204.9L997.5 260.8L998.5 308.8L986.8 372.5L971.1 412.7L935.8 468.6L896.1 509.3L843.1 544.6L792.2 564.2L757.8 572.1L726.5 575.0L541.2 575.0L537.7 572.5L561.3 529.4L602.0 466.2L735.3 465.2L766.7 458.3L813.7 434.8L842.6 409.8L861.3 386.3L880.9 346.1L888.7 312.7L888.7 261.8L875.0 215.7L846.6 171.6L805.9 136.8L766.7 118.1L730.4 110.3L569.6 110.3L565.2 107.8Z"/></symbol>
+</svg>
+
+<div id="pre" role="status" aria-label="Wird geladen">
+  <svg class="pre-mark" viewBox="0 0 1000 576" aria-hidden="true"><use href="#gd"/></svg>
+</div>
+
+<div class="deck">
+
+  <!-- 01 · tilted grid hero: the curved row is laid out by the script -->
+  <section class="panel" data-panel="tilt" data-height="1" data-stops="0" aria-label="Groove Dynamics">
+    <div class="tilt">
+      <div class="tilt__band" aria-hidden="true"></div>
+      <div class="tilt__copy">
+        <h1>Meistere das<br>Schlagzeug.</h1>
+        <p>18 Jahre in einer Methode. Struktur statt Zufall, Schlag für Schlag.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 · igloo's canvas: the two blocks of ice, then the fall through the rings.
+       Seven and a half screens: two for the blocks, five and a half for the fall. -->
+  <section class="panel" data-panel="ice" data-height="7.5" data-raw aria-label="Im Eis, durch die Ringe">
+    <div class="words">
+      <div class="words__line" aria-hidden="true"><p class="words__p">Du kannst zehn Jahre üben und stehst am selben Punkt. Nicht weil dir Talent fehlt, sondern weil dir nie jemand gesagt hat, worauf du hören sollst.</p></div>
+      <div class="words__line" aria-hidden="true"><p class="words__p">Technik kannst du abschauen. Timing nicht. Das Gefühl dafür, wann ein Schlag zu früh kommt, wächst nur neben jemandem, der es längst hat.</p></div>
+      <div class="words__line" aria-hidden="true"><p class="words__p">Am Ende zählt nicht, wie viel du geübt hast. Sondern bei wem.</p></div>
+      <div class="words__go"><a class="go" href="app.html"><span>Loslegen</span><span class="go__arrow" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a></div>
+      <p class="sr-only">Zwei Drumsticks und ein Zeichen, eingefroren in zwei Eisblöcken. Du kannst zehn Jahre üben und stehst am selben Punkt. Nicht weil dir Talent fehlt, sondern weil dir nie jemand gesagt hat, worauf du hören sollst. Technik kannst du abschauen. Timing nicht. Das Gefühl dafür, wann ein Schlag zu früh kommt, wächst nur neben jemandem, der es längst hat. Am Ende zählt nicht, wie viel du geübt hast. Sondern bei wem.</p>
+    </div>
+  </section>
+
+</div>
+
+
+
+<noscript><style>#pre{display:none!important}.panel{position:static!important;opacity:1!important;
+visibility:visible!important;min-height:100vh}.deck{position:static!important;overflow:visible!important}
+html,body{overflow:auto!important;height:auto!important}</style></noscript>
+
+<script>
+/* ============================================================================
+   DIAG — a phone cannot open a console. The page keeps a short record of what
+   the device is and what happened while it loaded: every step the ice reports,
+   every error, every file that did not arrive. It is written on the screen when
+   the address carries "debug" (…/?debug) — and, for as long as phones are still
+   being sorted out, by itself when the ice finds it has no picture to show.
+   ========================================================================== */
+(function () {
+  var t0 = performance.now(), lines = [], box = null;
+  var wanted = /debug/i.test(location.href);
+
+  function show() {
+    if (!wanted || !document.body) return;
+    if (!box) {
+      box = document.createElement('pre');
+      box.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:999;max-height:60%;overflow:auto;margin:0;' +
+        'padding:8px 10px;background:rgba(0,0,0,.86);color:#fff;font:10px/1.35 ui-monospace,Menlo,Consolas,monospace;' +
+        'white-space:pre-wrap;word-break:break-word;-webkit-user-select:text;user-select:text;touch-action:pan-y';
+      document.body.appendChild(box);
+    }
+    box.textContent = lines.join('\n');
+    box.scrollTop = box.scrollHeight;
+  }
+  function note(m) {
+    lines.push(((performance.now() - t0) / 1000).toFixed(1) + 's  ' + m);
+    if (lines.length > 120) lines.shift();
+    show();
+  }
+  /* something is wrong enough that the record should be seen without being asked for */
+  note.show = function () { wanted = true; show(); };
+  window.GDNote = note;
+
+  function text(v) {
+    if (v && v.stack) return String(v.message || v) + ' @ ' + String(v.stack).split('\n').slice(0, 3).join(' | ');
+    try { return typeof v === 'string' ? v : JSON.stringify(v); } catch (e) { return String(v); }
+  }
+  ['error', 'warn'].forEach(function (level) {
+    var own = console[level];
+    console[level] = function () {
+      note(level + ': ' + Array.prototype.map.call(arguments, text).join(' ').slice(0, 900));
+      return own.apply(console, arguments);
+    };
+  });
+  addEventListener('error', function (e) {
+    var el = e.target;
+    if (el && el !== window && (el.src || el.href)) note('not loaded: ' + (el.src || el.href));
+    else note('threw: ' + (e.message || '') + ' ' + (e.filename || '').split('/').pop() + ':' + (e.lineno || ''));
+  }, true);
+  addEventListener('unhandledrejection', function (e) { note('rejected: ' + text(e.reason).slice(0, 400)); });
+  try {
+    new PerformanceObserver(function (list) {
+      list.getEntries().forEach(function (r) {
+        if (r.responseStatus >= 400) note(r.responseStatus + ': ' + r.name.replace(location.origin, ''));
+      });
+    }).observe({ type: 'resource', buffered: true });
+  } catch (e) {}
+
+  note('build 714ce2c 2026-10-21 11:21');
+  note(navigator.userAgent);
+  note(innerWidth + 'x' + innerHeight + ' @' + (window.devicePixelRatio || 1) + '  touch:' + (navigator.maxTouchPoints || 0));
+  addEventListener('DOMContentLoaded', show);
+  addEventListener('load', function () { note('page loaded'); });
+  addEventListener('gd:ice-settled', function () { note('curtain may lift'); });
+})();
+
+</script>
+
+<script>
+/* ============================================================================
+   WORDS — what igloo's fall through the rings does not carry: three paragraphs,
+   one in each quiet stretch between two rings, and the one button where the
+   fall ends. A paragraph comes up out of the depth, stands to be read, and
+   burns away letter by letter as the next ring arrives.
+
+   The paragraphs are the page's own type, set by the browser, so they break
+   and space like any other text here — but they are not shown as HTML. Each is
+   drawn into a sheet of its own, and the ice (src/ice/ice.js) hangs the sheets
+   in igloo's picture the way igloo hangs its labels: there they are ink on the
+   paper and igloo's glowing white on a ring.
+   ========================================================================== */
+var GDWords = (function () {
+  'use strict';
+
+  /* how far down the fall each paragraph stands still. Igloo's rings flash as
+     they pass; these are the places in between where nothing flashes. */
+  var STOPS = [0.212, 0.318, 0.415];
+  /* where the fall ends: just through the third ring, the last paragraph
+     burnt away, before the floor and its circles would come up (the ice
+     leaves them out). Igloo goes on from here into a room; this page does not. */
+  var END = 0.462;
+
+  /* the fall, turned into "which paragraph is in front" as a running number */
+  var KNOTS = [[0.14, -0.95], [0.212, 0.5], [0.318, 1.5], [0.415, 2.5], [0.462, 3.1]];
+  var LEAD = 0.7, BURN_AT = 0.62, BURN_LEN = 0.38;
+  var FLOOR = 0.3, FAR = 4, NEAR = 0.25, OVER = 0.09;
+  /* the next paragraph only shows once the one being read has begun to burn:
+     nothing small and grey behind the lines while they stand */
+  var APPEAR = 0.42, RISE = 0.3;
+  /* a margin round a paragraph, so no letter touches the edge of its sheet */
+  var PAD = 6;
+
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function head(p) {
+    var last = KNOTS.length - 1;
+    if (p <= KNOTS[0][0]) return KNOTS[0][1];
+    if (p >= KNOTS[last][0]) return KNOTS[last][1];
+    for (var i = 1; i <= last; i++) {
+      if (p <= KNOTS[i][0]) {
+        var a = KNOTS[i - 1], b = KNOTS[i];
+        return a[1] + (b[1] - a[1]) * (p - a[0]) / (b[0] - a[0]);
+      }
+    }
+  }
+
+  function create(panel) {
+    var ps = Array.prototype.slice.call(panel.querySelectorAll('.words__p'));
+    var go = panel.querySelector('.words__go');
+    var shown = false;
+    /* sheet pixels per CSS pixel: a standing paragraph is shown a little under
+       its set size, a burning one grows — this keeps both crisp enough */
+    var K = Math.min(3, Math.max(1.5, (window.devicePixelRatio || 1) * 1.5));
+
+    ps.forEach(function (p) {
+      var text = p.textContent; p.textContent = '';
+      for (var i = 0; i < text.length; i++) {
+        if (text[i] === ' ') { p.appendChild(document.createTextNode(' ')); continue; }
+        var s = document.createElement('span'); s.textContent = text[i]; p.appendChild(s);
+      }
+    });
+
+    var sheets = ps.map(function () {
+      var canvas = document.createElement('canvas');
+      return {
+        canvas: canvas, ctx: canvas.getContext('2d'),
+        version: 0,            /* goes up when the sheet changes size */
+        dirty: false,          /* set when it has been redrawn */
+        w: 0, h: 0,            /* its size on the page, margin included */
+        show: 0, scale: 1,     /* how it is to be hung this frame */
+        letters: [], font: '', burn: -1
+      };
+    });
+
+    /* where the browser put every letter, and the moment each one catches:
+       from the middle outwards, unevenly */
+    function measure() {
+      ps.forEach(function (p, i) {
+        var s = sheets[i], box = p.getBoundingClientRect(), style = getComputedStyle(p);
+        if (!box.width || !box.height) return;
+        s.font = style.fontWeight + ' ' + (parseFloat(style.fontSize) * K).toFixed(2) + 'px ' + style.fontFamily;
+        s.ctx.font = s.font;
+        var ascent = s.ctx.measureText('Hg').fontBoundingBoxAscent / K;
+        s.letters = Array.prototype.map.call(p.children, function (el) {
+          var r = el.getBoundingClientRect();
+          var X = (r.left + r.width / 2 - box.left) / box.width;
+          var Y = (r.top + r.height / 2 - box.top) / box.height;
+          var noise = 0.5 + 0.28 * Math.sin(X * 11.3 + Y * 6.1 + 1.7)
+                          + 0.22 * Math.sin(X * 5.7 - Y * 13.9 + 4.2);
+          var rad = Math.hypot(X - 0.5, (Y - 0.5) * 1.15) / 0.62;
+          return { ch: el.textContent, x: r.left - box.left, y: r.top - box.top + ascent,
+                   t: clamp01(0.05 + 0.55 * rad + 0.45 * noise) };
+        });
+        s.w = box.width + 2 * PAD; s.h = box.height + 2 * PAD;
+        var cw = Math.ceil(s.w * K), ch = Math.ceil(s.h * K);
+        if (s.canvas.width !== cw || s.canvas.height !== ch) {
+          s.canvas.width = cw; s.canvas.height = ch; s.version++;
+        }
+        draw(s, s.burn < 0 ? 0 : s.burn);
+      });
+    }
+
+    /* the sheet carries only where the letters are; the colour is igloo's */
+    function draw(s, burn) {
+      var c = s.ctx;
+      s.burn = burn;
+      c.clearRect(0, 0, s.canvas.width, s.canvas.height);
+      c.font = s.font; c.textBaseline = 'alphabetic'; c.fillStyle = '#fff';
+      for (var i = 0; i < s.letters.length; i++) {
+        var l = s.letters[i], a = clamp01((l.t + 0.09 - burn) * 11);
+        if (a <= 0) continue;
+        c.globalAlpha = a;
+        c.fillText(l.ch, (PAD + l.x) * K, (PAD + l.y) * K);
+      }
+      c.globalAlpha = 1;
+      s.dirty = true;
+    }
+
+    measure();
+    addEventListener('resize', measure, { passive: true });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+
+    return {
+      stops: STOPS, end: END,
+      /* one sheet per paragraph: its canvas, and how it is to be hung this frame */
+      sheets: sheets,
+      /* p: how far down the fall, 0..1 — below zero while the rings are not on screen */
+      set: function (p) {
+        var h = head(p);
+        /* on a device that could not build the ice there is no picture to hang
+           them in: there the paragraphs are shown as the text they are */
+        var plain = panel.classList.contains('is-plain');
+        for (var i = 0; i < sheets.length; i++) {
+          var s = sheets[i], tt = h - i, line = ps[i].parentNode;
+          var vis = clamp01((tt + APPEAR) / RISE) * (FLOOR + (1 - FLOOR) * clamp01(tt / 0.45));
+          if (vis <= 0 || tt > 1 || !s.letters.length) {
+            s.show = 0;
+            if (plain) line.style.opacity = '0';
+            continue;
+          }
+          var depth = Math.max(FAR - (FAR - NEAR) * (tt + LEAD) / (1 + LEAD), NEAR);
+          if (plain) {
+            line.style.opacity = (vis * (1 - clamp01((tt - BURN_AT) / BURN_LEN))).toFixed(3);
+            line.style.transform = 'scale(' + (1 / depth).toFixed(4) + ')';
+            s.show = vis; s.scale = 1 / depth;
+            continue;
+          }
+          /* burning is redrawn in steps too fine to see */
+          var burn = Math.round(clamp01((tt - BURN_AT) / BURN_LEN) * (1 + OVER) * 96) / 96;
+          if (burn !== s.burn) draw(s, burn);
+          s.show = vis; s.scale = 1 / depth;
+        }
+        var on = p > END - 0.012;
+        if (on !== shown) { shown = on; go.classList.toggle('is-on', on); }
+      }
+    };
+  }
+
+  return { create: create };
+})();
+
+</script>
+
+<script>
+/* ============================================================================
+   ICE — igloo.inc's own scenes, loaded from the patched App3D bundle: the two
+   blocks of ice, then the fall through the rings. No recreation, no rewrite.
+   The original code runs unmodified; everything here goes through what it
+   already exposes — its config, its cameras, its composers — and does what
+   igloo's own controller does with them: lay the scenes end to end, hand each
+   its place in the scroll, and cut from one to the next with igloo's cut.
+   The same cut opens the canvas over the hero that lies under it.
+   ========================================================================== */
+var GDIce = (function () {
+  'use strict';
+
+  var BUNDLE_URL = 'assets/igloo/App3D-patched.js';
+
+  /* what is frozen into each block, top to bottom; a block without an entry
+     keeps igloo's own figure. Built by src/ice/make-sticks.mjs. */
+  var FIGURES = ['sticks'];
+  /* what igloo writes beside each block (its typeface has no umlauts): a
+     number and a word, and the day it was frozen */
+  var LABELS = ['Inner_Circle_01 Technik', 'Inner_Circle_02 Timing'];
+  var FROZEN = '21/10/2026';
+
+  /* how far left of centre the blocks sit, in screen widths */
+  var SHIFT = 0.17;
+
+  /* igloo's scene lengths, in screens: the blocks, the fall */
+  var BLOCKS = 2, FALL = 5.5;
+
+  var LINEAR = 1006, LINEAR_MIPMAP_LINEAR = 1008, UNSIGNED_BYTE = 1009, FLOAT = 1015, HALF_FLOAT = 1016;
+  var CUSTOM_BLENDING = 5, ONE = 201, SRC_ALPHA = 204;
+
+  /* igloo's cut slides the scene it brings in by this much of the screen, eased by a cube */
+  var PARALLAX = 0.4;
+  /* how far behind igloo's cut the paper follows, in the cut's own 0..1 */
+  var LAG = 0.22;
+  /* the way in, when the page opens: how long the round cut takes, in seconds */
+  var PLUNGE = 1.2;
+  /* how long a device may take to build the scenes before the page goes on without them */
+  var PATIENCE = 20;
+
+  /* a line for the report a phone can show of itself (src/shared/diag.js, ?debug) */
+  function note(m) { if (window.GDNote) window.GDNote('ice: ' + m); }
+
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function ramp(a, b, v) { var t = clamp01((v - a) / (b - a)); return t * t * (3 - 2 * t); }
+
+  /* a CSS colour as the linear RGB the composer works in */
+  function linear(css) {
+    var m = /(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(css) || [0, 0, 0, 0];
+    return [m[1], m[2], m[3]].map(function (v) {
+      var c = v / 255;
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+  }
+
+  function create(panel, scroll, centerScroll) {
+    var ig = null, cubes = null, entry = null, composers = null, cut = null, plane = null, paper = null;
+    var round = null, dive = null;                      /* the way in: igloo's cut bent into a circle, and its run */
+    var lines = [];                                     /* the paragraphs, hung in igloo's picture */
+    var ready = false, live = false, warm = 0, waiting = true;
+    var P = 0;                                          /* the stage's 0..1 across the whole panel */
+    var H = parseFloat(panel.getAttribute('data-height')) || BLOCKS + FALL;
+    var words = typeof GDWords !== 'undefined' ? GDWords.create(panel) : null;
+    var bridge = { scroll: scroll, centerScroll: centerScroll, isDetailOpen: false };
+    var wrapper = null;
+
+    /* warm, or not coming at all: either way nobody needs to wait any longer */
+    function settled() {
+      waiting = false;
+      clearTimeout(patience);
+      /* without the ice the page is still a page: the stage makes the cut
+         itself and the paragraphs are set as the text they are (src/ice/words.js) */
+      panel.classList.toggle('is-plain', !ready);
+      driver.cuts = ready;
+      note(ready ? 'warm' : 'going on without the scenes');
+      /* for as long as phones are being sorted out, a device left without the
+         scenes shows its own record of why (src/shared/diag.js) */
+      if (!ready && window.GDNote && window.GDNote.show) window.GDNote.show();
+      if (wrapper) wrapper.style.opacity = '1';
+      window.GDIceSettled = true;
+      window.dispatchEvent(new Event('gd:ice-settled'));
+    }
+    /* The scenes are built and still there is no picture — a buffer the card
+       will not draw into, a context it took away again: the page goes on
+       without them, exactly as if they had never come. */
+    function abandon(why) {
+      if (!ready && !waiting) return;
+      console.error('[ICE] ' + why);
+      ready = false; warm = 0; dive = null;
+      try { ig.Q.emit('webgl_render_active', false); } catch (e) {}
+      if (wrapper) wrapper.style.display = 'none';
+      settled();
+    }
+
+    /* a device that cannot build the scenes must not hold the page for ever.
+       Time in a tab that is not looked at does not count: nothing is drawn there. */
+    var patience = setTimeout(function wait() {
+      if (!waiting) return;
+      if (document.hidden) { patience = setTimeout(wait, 2000); return; }
+      settled();
+    }, PATIENCE * 1000);
+
+    /* Igloo asks for its files from the top of the host. Where the page lives
+       in a folder of its own (GitHub Pages: /groove-dynamics/) it is told that
+       folder — and its four workers, whose addresses are written out in full,
+       are sent there too. At the top of a host nothing changes. */
+    var home = location.pathname.replace(/[^/]*$/, '');
+    if (home !== '/' && window.Worker) {
+      var Native = window.Worker;
+      window.Worker = function (url, options) {
+        if (typeof url === 'string' && url.indexOf('/assets/') === 0) url = home + url.slice(1);
+        return new Native(url, options);
+      };
+      window.Worker.prototype = Native.prototype;
+    }
+
+    var script = document.createElement('script');
+    script.src = BUNDLE_URL;
+    script.onload = function () {
+      if (!window.__igloo) {
+        console.error('[ICE] Bundle loaded but window.__igloo not found');
+        settled();
+        return;
+      }
+      ig = window.__igloo;
+      note('bundle loaded');
+      initEngine();
+    };
+    script.onerror = function () {
+      console.error('[ICE] Failed to load patched bundle from', BUNDLE_URL);
+      settled();
+    };
+    document.head.appendChild(script);
+
+    function initEngine() {
+      /* should the page be scrolled here before the scenes are warm, they fade in */
+      wrapper = document.createElement('div');
+      wrapper.style.cssText = 'position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s ease;';
+      panel.insertBefore(wrapper, panel.firstChild);
+
+      /* a phone or tablet gets the resolution igloo itself gives it; a desktop
+         keeps the one it has had here */
+      var dpr = window.devicePixelRatio || 1;
+      var handheld = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+
+      ig.he.init({
+        canvasCnt: wrapper,
+        shadowMap: true,
+        shadowMapType: 2,
+        relativePath: home,
+        fingers: 2,
+        audioContext: false,
+        contextMenu: false,
+        DPR: handheld && dpr <= 2 ? Math.min(dpr, 1.15) : Math.min(dpr, 1.5),
+        adaptiveDPR: true
+      }).then(function () {
+        note('engine ready');
+        mendSmoothing();
+        /* igloo keeps the shader log switched off; asked for the record, it is wanted */
+        if (/debug/i.test(location.href)) ig.he.renderer.webgl.debug.checkShaderErrors = true;
+        ig.he.renderer.webgl.domElement.addEventListener('webglcontextlost', function () {
+          abandon('the graphics context was lost');
+        });
+        /* Igloo tells one frame from the next by its clock. Before the first
+           tick that clock reads zero, and a scene first drawn at zero never
+           stops drawing itself. A tab opened in the background does not tick
+           at all — so the scenes are only built once it has. */
+        var tick = function () {
+          if (!(ig.Fe.time > 0)) return;
+          ig.Q.off('webgl_prerender', tick);
+          try { createScenes(); note('scenes built'); }
+          catch (err) { console.error('[ICE] Scenes could not be built:', err); settled(); }
+        };
+        ig.Q.on('webgl_prerender', tick);
+      }).catch(function (err) {
+        console.error('[ICE] Engine init failed:', err);
+        settled();
+      });
+    }
+
+    /* The last thing between igloo's picture and the screen is its edge
+       smoothing, and that is written in a way an iPhone on iOS 27 will no
+       longer compile: three times it hands part of a vector — weights.rg — to
+       a function that writes into it. Chrome's and every older compiler take
+       it; this one refuses the whole shader, and with the last pass gone the
+       screen stays empty though every picture before it is there. So those
+       three places are said the long way round, through a vector of their
+       own, before the shaders are first compiled. Nothing they work out
+       changes. They are the only such places in the whole bundle. */
+    function mendSmoothing() {
+      var places = [
+        [/(\w*[mM]ovec)\(c\.xy,variable\.xy,value\.xy\);\1\(c\.zw,variable\.zw,value\.zw\);/g,
+         'if(c.x){variable.x=value.x;}if(c.y){variable.y=value.y;}if(c.z){variable.z=value.z;}if(c.w){variable.w=value.w;}'],
+        [/detectHorizontalCornerPattern\(weights\.rg,coords\.xyzy,d\);/g,
+         'vec2 across=weights.rg;detectHorizontalCornerPattern(across,coords.xyzy,d);weights.rg=across;'],
+        [/detectVerticalCornerPattern\(weights\.ba,coords\.xyxz,d\);/g,
+         'vec2 upright=weights.ba;detectVerticalCornerPattern(upright,coords.xyxz,d);weights.ba=upright;']
+      ];
+      var mended = 0;
+      function mend(holder) {
+        if (!holder || typeof holder.fragmentShader !== 'string') return;
+        var source = holder.fragmentShader;
+        places.forEach(function (p) { source = source.replace(p[0], p[1]); });
+        if (source === holder.fragmentShader) return;
+        holder.fragmentShader = source;
+        if (holder.isMaterial) holder.needsUpdate = true;
+        mended++;
+      }
+      try {
+        ig.he.composer.passes.forEach(function (pass) {
+          ((pass._effectComposer || {}).passes || []).forEach(function (inner) {
+            (inner.effects || []).forEach(function (effect) {
+              mend(effect);                               /* what the pass is put together from, should it be again */
+              mend(effect.weightsMaterial);
+            });
+            mend(inner.fullscreenMaterial);               /* and what it has been put together into */
+          });
+        });
+      } catch (err) { console.error('[ICE] could not mend the smoothing:', err); }
+      note('smoothing mended in ' + mended + ' places');
+    }
+
+    /* Where the screen is, the way igloo's controller reckons it: its top edge
+       sits in one scene, and for one screen's worth of scroll its bottom edge
+       is already in the next — that stretch is the cut. Above the blocks lies
+       the hero: there the cut opens the canvas itself. */
+    function where() {
+      var n = warm ? BLOCKS - 0.5 : P * (H + 1) - 1;    /* top edge, in screens from the top of the panel */
+      return {
+        n: n,
+        open: n < 0 ? clamp01(n + 1) : 1,
+        cut: n > BLOCKS - 1 && n < BLOCKS ? n - (BLOCKS - 1) : 0,
+        blocks: n < BLOCKS,
+        fall: n > BLOCKS - 1,
+        fallen: (n + 1 - BLOCKS) / (FALL + 1)
+      };
+    }
+
+    function createScenes() {
+      if (composers) return;
+
+      LABELS.forEach(function (title, i) {
+        if (!ig.Be.cubes[i]) return;
+        ig.Be.cubes[i].title = title;
+        ig.Be.cubes[i].date = FROZEN;
+      });
+      /* igloo would ask under the date for a click that opens nothing here: the date stands alone */
+      ig.Be.click = '';
+
+      FIGURES.forEach(function (name, i) {
+        if (!ig.Be.cubes[i]) return;
+        ig.Be.cubes[i].innerobject = name;
+        /* our textures are raw, so nothing has set their filtering yet */
+        var map = ig.le.load('cubes/' + name + '_color.ktx2');
+        map._loaded.then(function () {
+          map.minFilter = LINEAR_MIPMAP_LINEAR;
+          map.magFilter = LINEAR;
+          map.needsUpdate = true;
+        });
+      });
+
+      /* The room at the bottom of the fall holds a figure made of particles,
+         shaped by three volume textures. The figure is not shown here, so the
+         megabyte of volumes is not fetched: it gets one empty texel instead. */
+      ig.Be.links.forEach(function (link) {
+        var none = new ig.DA(new Uint8Array(4), 1, 1, 1);
+        none._loaded = Promise.resolve();
+        none.needsUpdate = true;
+        ig.le._texturesCache.set('volumes/' + link.vdb + '.ktx2_<>_3d-data', none);
+      });
+
+      /* One of igloo's pictures never came with the rest: the noise it lays
+         into the haze behind the blocks. Its loader has stood its own test
+         card in for it ever since, and that is what this page has looked like.
+         But on a browser that has to load pictures the old way — any browser
+         on an iPhone that is not a current Safari — the loader has nothing it
+         can stand in, and the one missing file holds the scenes up for ever.
+         So the stand-in is named here outright: the same card, for everyone. */
+      ig.le._texturesCache.set('perlin-datatexture.png_<>_srgb-repeat',
+        ig.le.load('uv/uvchecker-srgb.png', 'srgb-repeat'));
+
+      /* each scene renders into a composer of its own, exactly as igloo sets them up */
+      composers = [
+        new ig.tA({ scene: new ig.ty.cubes({ mainController: bridge }) }),
+        new ig.tA({ scene: new ig.ty.entry({ mainController: bridge }) })
+      ];
+      cubes = composers[0].passes[0].scene;
+      entry = composers[1].passes[0].scene;
+      if (cubes.height !== BLOCKS || entry.height !== FALL || H !== BLOCKS + FALL) {
+        console.warn('[ICE] scene lengths and data-height disagree', cubes.height, entry.height, H);
+      }
+
+      /* and one triangle fills the screen with them, through igloo's cut */
+      var board = ig.he.renderPass.scene;
+      cut = new ig.f3();
+      round = roundCut();
+      plane = new ig.Ce(ig.Si.triangle, cut);
+      plane.frustumCulled = false;
+      board.add(plane);
+
+      Promise.all([cubes.uploaded, entry.uploaded, board._upload()]).then(write).then(function () {
+        note('scenes uploaded');
+        /* in place of the figure and its links stands the button (src/ice/words.js) */
+        entry.containerparticles.mesh.material.visible = false;
+        /* the fall ends on the paper, not on igloo's floor and its circles */
+        entry.floor.mesh.material.visible = false;
+        entry.containerparticles.UI.enable = function () {};
+
+        frame();
+        ig.Q.on('resize', frame);
+        paper = paperPass();
+        ig.he.composer.addPass(paper.pass);
+        board.beforeRenderCbs.push(draw);
+        ready = true;
+        /* a few frames behind the curtain, half-way through the cut, so both
+           scenes and every shader are compiled before anything is scrolled to */
+        warm = 12;
+        ig.Q.on('webgl_postrender', function () {
+          if (warm === 1) examine();
+          if (warm && !--warm) { sync(); settled(); }
+          if (dive) surfaced();
+        });
+        ig.Q.emit('webgl_render_active', true);
+      }).catch(function (err) {
+        console.error('[ICE] Scenes failed:', err);
+        settled();
+      });
+    }
+
+    /* What the graphics card made of the last frame behind the curtain, half-way
+       through the cut: every buffer on the way to the screen, whether it could
+       be drawn into and what is in its middle. There igloo fills the whole
+       screen, so a record that says it is nowhere, or a screen left clear,
+       means there is no picture — and the page does not wait for one. The
+       findings go into the record a phone can show of itself. */
+    function examine() {
+      var bad = [];
+      try {
+        var r = ig.he.renderer.webgl, gl = r.getContext(), back = r.getRenderTarget();
+        var x = gl.drawingBufferWidth >> 1, y = gl.drawingBufferHeight >> 1;
+        var codes = [];
+        for (var e = gl.getError(); e && codes.length < 6; e = gl.getError()) codes.push(e);
+        var look = function (name, target, filled) {
+          r.setRenderTarget(target);
+          var whole = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+          var bytes = !target || target.texture.type === UNSIGNED_BYTE;
+          var px = bytes ? new Uint8Array(4) : new Float32Array(4);
+          gl.readPixels(target ? target.width >> 1 : x, target ? target.height >> 1 : y, 1, 1, gl.RGBA, bytes ? gl.UNSIGNED_BYTE : gl.FLOAT, px);
+          var read = gl.getError() === 0;
+          if (!whole) bad.push(name + ' cannot be drawn into');
+          else if (read && filled && !filled(px)) bad.push(name + ' is empty');
+          return name + (whole ? ' ' : ' BROKEN ') +
+            (read ? Array.prototype.map.call(px, function (v) { return bytes ? v : +v.toFixed(2); }).join('/') : 'unreadable');
+        };
+        var here = function (px) { return px[0] >= 0.5; };
+        var seen = [look('blocks', composers[0].readBuffer), look('fall', composers[1].readBuffer)]
+          .concat(paper.buffers().map(function (b) { return look(b[0], b[1], /record|matte/.test(b[0]) && here); }),
+                  look('screen', null, function (px) { return px[3] >= 128; }));
+        r.setRenderTarget(back);
+        note(document.documentElement.className.trim().replace(/\s+/g, '.') + '  dpr ' + ig.he.currentDPR +
+          '  ' + gl.drawingBufferWidth + 'x' + gl.drawingBufferHeight + '  gl errors ' + (codes.join(',') || 'none'));
+        note(seen.join('  '));
+      } catch (err) { note('could not examine: ' + err); }
+      if (bad.length) abandon('no picture: ' + bad.join(', '));
+    }
+
+    /* The paragraphs are the page's own type, drawn into sheets by the browser
+       (src/ice/words.js). Each sheet is hung in igloo's picture exactly the way
+       igloo hangs a label on a block: white, added to the light, in front of
+       everything and outside the depth of the scene. Being in the picture it
+       gets everything a label gets — the scene's grading, the bloom — and being
+       in the record of what igloo writes white, it is ink where it lies on
+       paper and igloo's own glowing white where it lies on a ring. Nothing
+       about that is decided here; it is the one mechanism, for both. */
+    function write() {
+      if (!words) return;
+      var label = cubes.cubes[0].texts.title.text.material;
+      lines = words.sheets.map(function (sheet, i) {
+        var line = new ig.Ce(ig.Si.plane, new ig.fe({
+          uniforms: { tSheet: { value: null }, uBox: { value: [0, 0] }, uShow: { value: 0 } },
+          /* the sheet keeps its place and size on the screen, whatever the camera does */
+          vertexShader: 'uniform vec2 uBox;varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy*uBox,0.0,1.0);}',
+          fragmentShader: 'uniform sampler2D tSheet;uniform float uShow;varying vec2 vUv;' +
+            'void main(){gl_FragColor=vec4(vec3(1.0),texture2D(tSheet,vUv).a*uShow);}',
+          transparent: true, depthTest: label.depthTest, depthWrite: label.depthWrite, blending: label.blending
+        }));
+        line.name = 'paragraph ' + i;
+        line.frustumCulled = false; line.visible = false; line.renderOrder = 999;
+        line.sheet = sheet; line.version = -1;
+        entry.add(line);
+        return line;
+      });
+    }
+
+    /* every frame: which sheets hang, how large, how strongly — as the words say */
+    function hang(w) {
+      lines.forEach(function (line, i) {
+        var s = line.sheet, u = line.material.uniforms;
+        /* behind the curtain the first one is drawn unseen, so its shader is ready */
+        line.visible = warm ? i === 0 : live && w.fall && s.show > 0;
+        if (!line.visible) return;
+        if (line.version !== s.version) {
+          if (u.tSheet.value) u.tSheet.value.dispose();
+          u.tSheet.value = new ig.Rt(s.canvas);
+          u.tSheet.value.minFilter = LINEAR; u.tSheet.value.magFilter = LINEAR; u.tSheet.value.generateMipmaps = false;
+          line.version = s.version; s.dirty = true;
+        }
+        if (s.dirty) { u.tSheet.value.needsUpdate = true; s.dirty = false; }
+        u.uShow.value = warm ? 0 : s.show;
+        u.uBox.value = [2 * s.w * s.scale / innerWidth, 2 * s.h * s.scale / innerHeight];
+      });
+    }
+
+    /* Igloo's cut climbs the screen as a diagonal. The way into the page is the
+       same cut bent into a circle: igloo's own shader, in which the one
+       expression that says how far along a place lies is read from the middle
+       outwards instead of from the bottom up. What the cut does to the two
+       pictures it joins — the slide, the smear along the edge — has nothing
+       to work on where it joins paper, sky and the hero under the canvas, and
+       is switched off, so that the record of what lies where keeps its edges. */
+    function roundCut() {
+      var material = new ig.f3(), source = material.fragmentShader;
+      var edits = [
+        /* 0 in the middle, 1 in the corners; the edge wavers as igloo's does, by
+           half as much, so that it still reads as a circle — and only ever
+           outwards, so that nothing is open before the cut has begun */
+        ['vUv.y + inclination * abs(slope)',
+         '(length((vUv - 0.5) * vec2(aspect, 1.0)) / length(vec2(aspect, 1.0) * 0.5) + (slopeDisp + 0.4) * abs(slope) * 0.5)'],
+        ['const float parallaxY = 0.4;', 'const float parallaxY = 0.0;'],
+        ['const float displacement = 0.025;', 'const float displacement = 0.0;'],
+        ['float modulator = 12.0 *', 'float modulator = 0.0 *']
+      ];
+      for (var i = 0; i < edits.length; i++) {
+        if (source.indexOf(edits[i][0]) < 0) return null;   /* not the shader this was written for: no way in, the curtain just lifts */
+        source = source.split(edits[i][0]).join(edits[i][1]);
+      }
+      material.fragmentShader = source;
+      return material;
+    }
+
+    /* The way in, once, when the curtain lifts: the canvas lies over the hero
+       as a sheet of the page's own paper, the round cut opens it from the
+       middle — igloo's sky first, as the band it is in every cut, and behind
+       it nothing, the hero itself — and runs out over the corners.
+       o.begin: the first frame is on screen; o.step(q): each frame, 0..1;
+       o.end: the canvas is clear and put away again. */
+    function plunge(o) {
+      if (!ready || warm || !round || dive || live || scroll.y > 0.001) return false;
+      dive = { t: 0, last: performance.now(), dur: o.dur || PLUNGE, q: 0, o: o, begun: false, over: false };
+      wrapper.style.transition = 'none';
+      wrapper.style.opacity = '1';
+      panel.style.opacity = '1';
+      panel.style.visibility = 'visible';
+      plane.material = round;
+      ig.Q.emit('webgl_render_active', true);
+      return true;
+    }
+
+    /* one frame of it, in place of the scenes */
+    function dip() {
+      var now = performance.now(), u = round.uniforms, gap = now - dive.last;
+      /* a tab that was away while it ran has not missed it: the time away does not count */
+      dive.t += (gap > 1000 ? 16 : gap) / 1000; dive.last = now;
+      var k = clamp01(dive.t / dive.dur);
+      /* it gathers speed on the way out, as an opening does that one passes through */
+      dive.q = k * (0.35 + 0.65 * k);
+      dive.over = k >= 1;
+      var paperAt = clamp01((dive.q - LAG) / (1 - LAG));
+      lines.forEach(function (line) { line.visible = false; });
+      /* the sky is the blocks' own, from above them, before the first has come up */
+      cubes.isSceneVisible = true; entry.isSceneVisible = false;
+      cubes.progress = 0;
+      composers[0].render();
+      u.tScene1.value = composers[0].readBuffer.texture;
+      u.tScene2.value = paper.nothing;
+      u.uProgress.value = paperAt;
+      u.uInCubes.value = false;
+      paper.plunge(dive.q, paperAt);
+      if (dive.o.step) dive.o.step(dive.q);
+    }
+
+    /* after each of its frames has reached the screen */
+    function surfaced() {
+      var o = dive.o;
+      if (!dive.begun) { dive.begun = true; if (o.begin) o.begin(); }
+      if (!dive.over) return;
+      dive = null;
+      plane.material = cut;
+      panel.style.opacity = ''; panel.style.visibility = '';
+      cubes.isSceneVisible = false;
+      sync();
+      if (o.end) o.end();
+    }
+
+    /* once a frame, from inside igloo's own render */
+    function draw() {
+      if (dive) return dip();
+      var w = where(), u = cut.uniforms, hero = w.n < 0;
+      paper.tune(w);
+      hang(w);
+      cubes.isSceneVisible = live && w.blocks;
+      entry.isSceneVisible = live && w.fall;
+      if (w.blocks) { cubes.progress = clamp01((w.n + 1) / (BLOCKS + 1)); composers[0].render(); }
+      if (w.fall) { entry.progress = clamp01(w.fallen); composers[1].render(); }
+      /* over the hero the upper scene is nothing at all, and the blocks come in under it */
+      u.tScene1.value = hero ? paper.nothing : composers[w.blocks ? 0 : 1].readBuffer.texture;
+      u.tScene2.value = composers[hero ? 0 : 1].readBuffer.texture;
+      u.uProgress.value = hero ? w.open : w.cut;
+      u.uProgressVel.value = scroll.velocity;
+      u.tCubes.value = composers[0].readBuffer.texture;
+      u.uInCubes.value = w.blocks && !hero;
+      paper.update(w);
+    }
+
+    /* the canvas only draws while its panel is on screen */
+    function sync() {
+      if (!ready || warm) return;
+      ig.Q.emit('webgl_render_active', live);
+    }
+
+    /* The blocks move aside by shifting the camera's window, not the canvas:
+       igloo reads the pointer in window coordinates, so the picture and the
+       ray under the cursor have to move together. A portrait screen has no
+       room to the side, there they stay centred. The fall stays where it is. */
+    function frame() {
+      var w = innerWidth, h = innerHeight;
+      var shift = SHIFT * clamp01((w / h - 0.9) / 0.5);
+      cubes.camera.setViewOffset(w, h, shift * w, 0, w, h);
+    }
+
+    /* Every place the page comes to rest in here, as the screen's top edge: a
+       block in the middle of the screen, a paragraph between two rings, and
+       the white just through the last ring, where the fall ends. */
+    var spots = [];
+    for (var i = 0; i < BLOCKS; i++) spots.push(i);
+    (words ? words.stops.concat(words.end) : [0.2, 0.48]).forEach(function (p) {
+      spots.push(p * (FALL + 1) + BLOCKS - 1);
+    });
+
+    /* Left alone for a moment, the page goes on to the next of them in the
+       direction it was pushed, at igloo's own paces: quick between the blocks,
+       two seconds a screen across the cut, unhurried down the fall. */
+    function rest(heading) {
+      if (!ready) return false;
+      var n = where().n, to = null, near = null;
+      spots.forEach(function (s) {
+        var d = s - n;
+        if (near === null || Math.abs(d) < Math.abs(near)) near = d;
+        if (d * heading > 0.004 && (to === null || Math.abs(d) < Math.abs(to))) to = d;
+      });
+      if (to === null) to = near;
+      var d = Math.abs(to), lo = Math.min(n, n + to), hi = Math.max(n, n + to);
+      if (d < 0.004) return true;
+      centerScroll(scroll.y + to,
+        hi <= BLOCKS - 1 ? clamp(d * 6, 1.6, 2.4) :
+        lo < BLOCKS ? clamp(d * 2, 2, 4) :
+        clamp(d * 4, 2, 20));
+      return true;
+    }
+
+    /* The page is white, igloo's sky is not — and its scenes are made of that
+       sky: the ice refracts it, the bloom carries it across everything. So
+       each scene is drawn exactly as it was, and only afterwards whatever is
+       not thing — block, ring, floor — is covered with paper. What igloo
+       writes white on the sky — its labels, and the paragraphs hung the same
+       way — is redrawn on the paper as ink, and stays igloo's glowing white
+       wherever it lies on a thing.
+
+       The cut tears the paper along its own edge, because the record of what
+       stays is sent through the very same cut as the picture. And the scene
+       the cut brings in is not white at once: the paper follows the cut a
+       little way behind, as a second cut of the same kind, so that igloo's
+       sky runs along the frozen edge as a band and never fills the screen. */
+    function paperPass() {
+      var renderer = ig.he.renderer.webgl;
+      var size = ig.he.uniforms.resolution.value;
+      var sheetOf = linear(getComputedStyle(panel.parentNode).backgroundColor);
+      var inkOf = linear(getComputedStyle(panel).color);
+      var colour = cubes.bg.mesh.material.uniforms.uColor1.value.clone();
+      var flat = colour.clone().setRGB(sheetOf[0], sheetOf[1], sheetOf[2]);
+      var coming = null;                              /* the scene igloo's cut is bringing in, if any */
+
+      /* One record per scene, in the scene's own picture. Red: igloo is here
+         at all. Green: what it draws white on the sky. Blue less green: what
+         stays as it is. */
+      /* They hold more than fits into eight bits — what igloo writes white is
+         added on top of what is there. Half floats, as igloo's own buffers; a
+         card that will not draw into those is asked for whole ones. */
+      var gl = renderer.getContext();
+      var deep = [HALF_FLOAT, FLOAT].filter(function (type) {
+        var probe = new ig.vt(4, 4, { type: type, depthBuffer: false }), kept = renderer.getRenderTarget();
+        renderer.setRenderTarget(probe);
+        var whole = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+        renderer.setRenderTarget(kept);
+        probe.dispose();
+        return whole;
+      })[0];
+      if (!deep) throw new Error('no buffer deep enough to keep the records in');
+      note('records kept as ' + (deep === HALF_FLOAT ? 'half floats' : 'floats'));
+      var records = [
+        new ig.vt(size.x, size.y, { type: deep }),
+        new ig.vt(size.x, size.y, { type: deep, depthBuffer: false })
+      ];
+      /* the things of the fall, drawn alone: their own alpha says where they are */
+      var alone = new ig.vt(size.x, size.y);
+      /* the records, once igloo's cut has moved them to where they are on screen */
+      var matte = new ig.vt(size.x, size.y, { type: deep, depthBuffer: false });
+      /* how far the paper has come, on screen: the same cut, run a little behind */
+      var behind = new ig.vt(size.x, size.y, { depthBuffer: false });
+      /* the two sides that cut is made of: no paper, all paper */
+      var nothing = new ig.vt(2, 2, { depthBuffer: false });
+      var everything = new ig.vt(2, 2, { depthBuffer: false });
+      /* and two whole records for the way in: igloo here and all of it paper, igloo here and all of it kept */
+      var blank = new ig.vt(2, 2, { depthBuffer: false });
+      var kept = new ig.vt(2, 2, { depthBuffer: false });
+
+      var target = renderer.getRenderTarget(), alpha = renderer.getClearAlpha();
+      renderer.getClearColor(colour);
+      [[nothing, 0x000000], [everything, 0xffffff], [blank, 0xff0000], [kept, 0xff00ff]].forEach(function (fill) {
+        renderer.setRenderTarget(fill[0]);
+        renderer.setClearColor(fill[1], 1);
+        renderer.clear(true, false, false);
+      });
+      renderer.setRenderTarget(target);
+      renderer.setClearColor(colour, alpha);
+
+      var flatQuad = 'void main(){gl_Position=vec4(position,1.0);}';
+      var solid = new ig.fe({
+        uniforms: { tMouseFrost: { value: null } },   /* the block's own render hook writes here */
+        vertexShader: 'void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+        fragmentShader: 'void main(){gl_FragColor=vec4(1.0,0.0,1.0,1.0);}'
+      });
+      /* how much paper lies at a place in the incoming scene's own picture:
+         where the following cut has got to, moved back by the scene's slide */
+      var LAID = [
+        'uniform sampler2D tBehind;uniform vec2 uSize;uniform float uSlide;uniform float uComing;',
+        'float laid(){',
+        '  if(uComing<0.5)return 1.0;',
+        '  return texture2D(tBehind,gl_FragCoord.xy/uSize-vec2(0.0,uSlide)).r;',
+        '}'
+      ].join('\n');
+      function coverage() {
+        return { tBehind: { value: behind.texture }, uSize: { value: size }, uSlide: { value: 0 }, uComing: { value: 0 } };
+      }
+      /* onto the blocks' record: where no paper lies yet, everything stays and nothing is ink */
+      var lift = new ig.Ce(ig.Si.triangle, new ig.fe({
+        uniforms: coverage(),
+        vertexShader: flatQuad,
+        fragmentShader: LAID + '\nvoid main(){float l=laid();gl_FragColor=vec4(1.0-l,0.0,1.0-l,l);}',
+        blending: CUSTOM_BLENDING, blendSrc: ONE, blendDst: SRC_ALPHA,
+        transparent: true, depthTest: false, depthWrite: false
+      }));
+      /* the fall's record, out of the alpha its things were drawn with */
+      var turn = new ig.Ce(ig.Si.triangle, new ig.fe({
+        uniforms: Object.assign({ tAlone: { value: alone.texture } }, coverage()),
+        vertexShader: flatQuad,
+        fragmentShader: [
+          LAID, 'uniform sampler2D tAlone;',
+          'void main(){',
+          '  float a=texelFetch(tAlone,ivec2(gl_FragCoord.xy),0).a;',
+          '  gl_FragColor=vec4(1.0,0.0,mix(1.0,a,laid()),1.0);',
+          '}'
+        ].join('\n'),
+        depthTest: false, depthWrite: false
+      }));
+      var sheet = new ig.Ce(ig.Si.triangle, new ig.fe({
+        uniforms: {
+          tPicture: { value: null }, tMatte: { value: matte.texture },
+          uPaper: { value: sheetOf }, uInk: { value: inkOf }
+        },
+        vertexShader: flatQuad,
+        fragmentShader: [
+          'uniform sampler2D tPicture;uniform sampler2D tMatte;uniform vec3 uPaper;uniform vec3 uInk;',
+          'void main(){',
+          '  ivec2 p=ivec2(gl_FragCoord.xy);',
+          '  vec4 m=texelFetch(tMatte,p,0);',
+          '  vec3 c=texelFetch(tPicture,p,0).rgb;',
+          '  float here=clamp(m.r,0.0,1.0);',
+          '  float per=here>0.0001?1.0/here:0.0;',
+          '  float keep=clamp(m.b-m.g,0.0,here);',
+          '  float ink=clamp(m.g*per,0.0,1.0);',
+          /* where a thing fades out softly, a letter does not fade with it into
+             grey on grey: it is either ink or igloo's white, and turns at once */
+          '  keep=mix(keep,here*smoothstep(0.65,0.85,keep*per),ink);',
+          '  gl_FragColor=vec4((here-keep)*mix(uPaper,uInk,ink)+keep*per*c,here);',
+          '}'
+        ].join('\n'),
+        depthTest: false, depthWrite: false
+      }));
+      lift.frustumCulled = turn.frustumCulled = sheet.frustumCulled = false;
+
+      /* the plexus is a faint grey on the sky; as ink it needs to be said louder */
+      var faint = [];
+      cubes.cubes.forEach(function (cube) {
+        [cube.plexus.linesMesh, cube.plexus.pointMesh].forEach(function (part) {
+          var c = part.mesh.material.uniforms.uColor.value;
+          faint.push({ material: part.mesh.material, colour: c, own: c.clone() });
+        });
+      });
+      function plexus(loud) {
+        faint.forEach(function (f) {
+          if (loud) f.colour.setRGB(0.7, 0.7, 0.7); else f.colour.copy(f.own);
+          f.material.uniformsNeedUpdate = true;
+        });
+      }
+
+      /* what stays of the fall: the rings and the floor. Far off, igloo lets a
+         ring fade into its sky — on paper it has to fade into the paper. */
+      var things = entry.rings.meshes.concat(entry.floor.mesh), mist = [];
+      entry.rings.meshes.forEach(function (ring) {
+        ['uColor1', 'uColor2'].forEach(function (name) {
+          var c = ring.material.uniforms[name].value;
+          mist.push({ material: ring.material, colour: c, own: c.clone() });
+        });
+      });
+
+      return {
+        nothing: nothing.texture,
+        /* for the report: the buffers of this pass, by name */
+        buffers: function () {
+          return [['record0', records[0]], ['record1', records[1]], ['alone', alone], ['matte', matte], ['behind', behind]];
+        },
+        /* before the scenes are drawn */
+        tune: function (w) {
+          var p = w.n < 0 ? w.open : w.cut;
+          coming = w.n < 0 || w.cut > 0 ? { scene: w.n < 0 ? 0 : 1, at: p, paper: clamp01((p - LAG) / (1 - LAG)) } : null;
+          var white = coming && coming.scene === 1 ? coming.paper : 1;
+          mist.forEach(function (m) {
+            m.colour.copy(m.own).lerp(flat, white);
+            m.material.uniformsNeedUpdate = true;
+          });
+        },
+        /* after them, with the cut already set */
+        update: function (w) {
+          var u = cut.uniforms, one = u.tScene1.value, two = u.tScene2.value, at = u.uProgress.value, hero = w.n < 0;
+          var back = renderer.getRenderTarget(), auto = renderer.autoClear, a = renderer.getClearAlpha();
+          renderer.getClearColor(colour);
+          renderer.autoClear = false;
+
+          /* behind the curtain the cut over the hero is not on screen: its one
+             own shader is drawn once all the same, so the first scroll finds it compiled */
+          if (warm) {
+            renderer.setRenderTarget(records[0]);
+            renderer.render(lift, cubes.camera);
+          }
+          /* and so is the round cut, so the way in starts compiled */
+          if (warm && round) {
+            round.uniforms.tScene1.value = nothing.texture; round.uniforms.tScene2.value = everything.texture;
+            round.uniforms.uProgress.value = 0.5;
+            plane.material = round;
+            renderer.setRenderTarget(behind);
+            renderer.render(plane, ig.he.renderPass.camera);
+            plane.material = cut;
+          }
+
+          if (coming) {
+            u.tScene1.value = nothing.texture; u.tScene2.value = everything.texture;
+            u.uProgress.value = coming.paper;
+            renderer.setRenderTarget(behind);
+            renderer.render(plane, ig.he.renderPass.camera);
+            u.uProgress.value = at;
+          }
+          [lift, turn].forEach(function (q, scene) {
+            var v = q.material.uniforms, on = coming && coming.scene === scene;
+            v.uComing.value = on ? 1 : 0;
+            v.uSlide.value = on ? PARALLAX * Math.pow(1 - coming.at, 3) : 0;
+          });
+
+          if (w.blocks) {
+            renderer.setRenderTarget(records[0]);
+            renderer.setClearColor(0xff0000, 1);
+            renderer.clear(true, true, false);
+            plexus(true);
+            renderer.render(cubes.textsGroup, cubes.camera);
+            cubes.cubes.forEach(function (cube) { renderer.render(cube.plexus.group, cubes.camera); });
+            plexus(false);
+            if (hero) renderer.render(lift, cubes.camera);
+            cubes.cubes.forEach(function (cube) {
+              var ice = cube.mesh.material;
+              cube.mesh.material = solid;
+              renderer.render(cube.mesh, cubes.camera);
+              cube.mesh.material = ice;
+            });
+          }
+          if (w.fall) {
+            renderer.setRenderTarget(alone);
+            renderer.setClearColor(0x000000, 0);
+            renderer.clear(true, true, false);
+            things.forEach(function (thing) { renderer.render(thing, entry.camera); });
+            renderer.setRenderTarget(records[1]);
+            renderer.render(turn, entry.camera);
+            /* the paragraphs are what igloo writes white here: ink on the paper */
+            lines.forEach(function (line) { if (line.visible) renderer.render(line, entry.camera); });
+          }
+
+          /* With no cut running, igloo's cut hands its first picture through
+             untouched — so the record already is what it would come out as,
+             and the screen is not filled once more just to copy it. */
+          if (!hero && !(at > 0)) {
+            sheet.material.uniforms.tMatte.value = records[w.blocks ? 0 : 1].texture;
+          } else {
+            sheet.material.uniforms.tMatte.value = matte.texture;
+            u.tScene1.value = hero ? nothing.texture : records[w.blocks ? 0 : 1].texture;
+            u.tScene2.value = records[hero ? 0 : 1].texture;
+            renderer.setRenderTarget(matte);
+            renderer.render(plane, ig.he.renderPass.camera);
+            u.tScene1.value = one; u.tScene2.value = two;
+          }
+
+          renderer.setRenderTarget(back);
+          renderer.setClearColor(colour, a);
+          renderer.autoClear = auto;
+        },
+        /* the way in, with the round cut already set for the picture: paper
+           all over; where the cut has opened it, the sky, kept; and where the
+           paper would follow in any other cut, nothing — the canvas is clear */
+        plunge: function (at, paperAt) {
+          var u = round.uniforms, one = u.tScene1.value, two = u.tScene2.value;
+          var back = renderer.getRenderTarget(), auto = renderer.autoClear;
+          renderer.autoClear = false;
+          u.tScene1.value = kept.texture; u.tScene2.value = nothing.texture;
+          u.uProgress.value = paperAt;
+          renderer.setRenderTarget(behind);
+          renderer.render(plane, ig.he.renderPass.camera);
+          u.tScene1.value = blank.texture; u.tScene2.value = behind.texture;
+          u.uProgress.value = at;
+          sheet.material.uniforms.tMatte.value = matte.texture;
+          renderer.setRenderTarget(matte);
+          renderer.render(plane, ig.he.renderPass.camera);
+          u.tScene1.value = one; u.tScene2.value = two;
+          u.uProgress.value = paperAt;
+          renderer.setRenderTarget(back);
+          renderer.autoClear = auto;
+        },
+        pass: {
+          enabled: true, needsSwap: true, renderToScreen: false, clear: false,
+          setSize: function (w, h) {
+            records[0].setSize(w, h); records[1].setSize(w, h); alone.setSize(w, h);
+            matte.setSize(w, h); behind.setSize(w, h);
+          },
+          /* where igloo is not, the canvas is left clear and the hero shows through */
+          render: function (r, writeBuffer, readBuffer) {
+            var back = r.getRenderTarget(), auto = r.autoClear;
+            r.autoClear = false;
+            sheet.material.uniforms.tPicture.value = readBuffer.texture;
+            r.setRenderTarget(writeBuffer);
+            r.render(sheet, cubes.camera);
+            r.setRenderTarget(back);
+            r.autoClear = auto;
+          },
+          dispose: function () {
+            [records[0], records[1], alone, matte, behind, nothing, everything, blank, kept].forEach(function (t) { t.dispose(); });
+            solid.dispose(); lift.material.dispose(); turn.material.dispose(); sheet.material.dispose();
+          }
+        }
+      };
+    }
+
+    function tell() {
+      if (!words) return;
+      var n = P * (H + 1) - 1;
+      words.set(live && n > BLOCKS - 1 ? (n + 1 - BLOCKS) / (FALL + 1) : -1);
+    }
+
+    var driver = {
+      /* igloo's cut also brings this panel in: the stage leaves the hand-over to it */
+      cuts: true,
+      /* the first and the last place to stand: the first block, and the end of the fall */
+      ends: [spots[0], spots[spots.length - 1]],
+      /* over a real line the scenes take their time: until they are warm the
+         page ends before them — and it stays where it is for the way in */
+      waits: function () { return waiting || !!dive; },
+      plunge: plunge,
+      enter: function () { live = true; sync(); tell(); },
+      leave: function () { live = false; sync(); tell(); },
+      progress: function (p) { P = p; tell(); },
+      rest: rest,
+      step: function () {}
+    };
+    return driver;
+  }
+
+  return { create: create };
+})();
+
+</script>
+
+<script>
+(function () {
+'use strict';
+
+var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $  = function (s, c) { return (c || document).querySelector(s); };
+var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+var clamp = function (v, a, b) { return v < a ? a : v > b ? b : v; };
+var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+/* a spring with the same shape framer-motion uses */
+function Spring(v, stiffness, damping) {
+  this.v = v; this.target = v; this.vel = 0; this.k = stiffness; this.d = damping;
+}
+Spring.prototype.step = function (dt) {
+  dt = Math.min(dt, 1 / 30);
+  var a = this.k * (this.target - this.v) - this.d * this.vel;
+  this.vel += a * dt; this.v += this.vel * dt;
+  return this.v;
+};
+
+/* one clock; a throwing module must not stop the others */
+var ticks = [];
+function onTick(fn) { ticks.push(fn); }
+(function () {
+  var last = performance.now();
+  requestAnimationFrame(function step(t) {
+    var dt = Math.min((t - last) / 1000, 0.05); last = t;
+    for (var i = 0; i < ticks.length; i++) { try { ticks[i](dt, t); } catch (e) {} }
+    requestAnimationFrame(step);
+  });
+})();
+
+/* ============================================================================
+   01 — TILTED GRID HERO
+   The component's own geometry and its own defaults. A CSS box cannot bend,
+   so every tile is cut into sixteen upright strips, each a flat facet of the
+   cylinder; the tile carries them round on one rotation, and only its delay
+   says where on the arc it is.
+   ========================================================================== */
+function tiltDriver(panel) {
+  var root = $('.tilt', panel), band = $('.tilt__band', panel);
+  var SLICES = 16, CAMERA = 1.6, MAX_WIDTH = 55;
+  var speed = 4, tileHeight = 26, aspect = 16 / 9, gap = 6, axis = 56, curve = 80, fade = 12;
+  var bend = clamp(curve, 5, 85) * Math.PI / 180;
+
+  /* the pictures of the component's own demo, in its order: photographs and
+     gradients in turn, served from where the demo serves them */
+  var CDN = 'https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev';
+  var images = [
+    '/stock-images/767d99bb371a54d0d36751e8cecae43c.jpg',
+    '/gradients/hero_gradient/hero-gradients-01.png',
+    '/stock-images/821d815affa6496c39cbdeeec7a84603.jpg',
+    '/gradients/moon/moon-grade-03.png',
+    '/stock-images/937438c560ada1c83317f2c11b3454b0.jpg',
+    '/gradients/shade_shiters/shade-shifters-05.png',
+    '/stock-images/98f89cb9994f5c382ab964062c4039db.jpg',
+    '/gradients/shade_shiters/shade-shifters-09.png',
+    '/stock-images/ddcbee38be8b7274e19e132d7ab35b53.jpg',
+    '/gradients/moon/moon-grade-06.png'
+  ].map(function (path) { return CDN + path; });
+  /* fetched up front: a tile picks up its next one just before it comes back
+     into view, too late to start loading it then */
+  images.forEach(function (src) { new Image().src = src; });
+
+  /* radius, as a share of the width, that puts the frame's edge `bend` round the arc */
+  function arc(b) { return (CAMERA - 1 + Math.cos(b)) / (2 * CAMERA * Math.sin(b)); }
+  function measure(width, height) {
+    var h = Math.min(tileHeight / 100 * height, MAX_WIDTH / 100 * width / aspect);
+    var radius = width * arc(bend);
+    if (!(h > 0) || !(radius > 0)) return { columns: 2, sweep: 0, unit: 0, limit: 0 };
+    var deg = function (rad) { return rad * 180 / Math.PI; };
+    var unit = deg(h / radius);
+    var pitch = (aspect + gap / 100) * unit;
+    var limit = deg(bend) + aspect * unit / 2;
+    var columns = Math.min(60, Math.max(2, Math.ceil(2 * limit / pitch)));
+    var round = function (v) { return +v.toFixed(4); };
+    var sweep = round(columns * pitch / 2);
+    return { columns: columns, sweep: sweep, unit: round(unit), limit: round(Math.min(sweep, limit)) };
+  }
+
+  /* every length is a multiple of the tile's height */
+  function u(v) {
+    return 'calc(' + +v.toFixed(4) + ' * min(' + tileHeight + 'cqh, ' + +(MAX_WIDTH / aspect).toFixed(4) + 'cqw))';
+  }
+  var r = 100 * arc(bend), radius = +r.toFixed(3) + 'cqw';
+  /* out to the axis, round it, back in */
+  function turn(deg) {
+    return 'translateZ(' + radius + ') rotateY(' + +deg.toFixed(4) + 'deg) translateZ(-' + radius + ')';
+  }
+
+  var mask = 'linear-gradient(90deg,transparent,#000 ' + fade + '%,#000 ' + (100 - fade) + '%,transparent)';
+  band.style.perspective = +(r * CAMERA).toFixed(3) + 'cqw';
+  band.style.perspectiveOrigin = '50% ' + axis + '%';
+  band.style.maskImage = mask; band.style.webkitMaskImage = mask;
+
+  var sheet = document.createElement('style');
+  root.insertBefore(sheet, band);
+  var layout = null;
+
+  function lay(l) {
+    var hide = +((l.sweep - l.limit) / (2 * l.sweep || 1) * 100).toFixed(4);
+    var share = aspect / SLICES, duration = l.columns * speed;
+    sheet.textContent =
+      '@keyframes tilt-orbit{from{transform:' + turn(-l.sweep) + '}to{transform:' + turn(l.sweep) + '}' +
+      '0%,' + hide + '%,' + (100 - hide) + '%,100%{visibility:hidden}' +
+      (hide + 0.001) + '%,' + (100 - hide - 0.001) + '%{visibility:visible}}' +
+      '@media(prefers-reduced-motion:reduce){.tilt__tile{animation-play-state:paused}}';
+
+    band.textContent = '';
+    for (var t = 0; t < l.columns; t++) {
+      (function (t) {
+        /* the last tile starts nearest the exit, so this numbers them as they come on */
+        var first = l.columns - 1 - t;
+        var tile = document.createElement('div'), pics = [];
+        tile.className = 'tilt__tile';
+        tile.style.left = 'calc(50% - ' + u(aspect / 2) + ')';
+        tile.style.top = 'calc(' + axis + '% - ' + u(0.5) + ')';
+        tile.style.width = u(aspect); tile.style.height = u(1);
+        tile.style.animation = 'tilt-orbit ' + duration + 's linear ' + (-t * speed) + 's infinite';
+        for (var k = 0; k < SLICES; k++) {
+          var strip = document.createElement('div'), img = document.createElement('img');
+          strip.className = 'tilt__strip';
+          strip.style.left = u((aspect - share) / 2);
+          /* a pixel wider than its share, so no hairline opens between facets */
+          strip.style.width = k === SLICES - 1 ? u(share) : 'calc(' + u(share) + ' + 1px)';
+          strip.style.height = u(1);
+          strip.style.transform = turn((aspect / 2 - (k + 0.5) * share) * l.unit);
+          img.alt = ''; img.draggable = false;
+          img.style.left = u(-k * share); img.style.width = u(aspect); img.style.height = u(1);
+          img.src = images[first % images.length];
+          strip.appendChild(img); tile.appendChild(strip); pics.push(img);
+        }
+        /* a tile takes its next picture each time it wraps, out of sight */
+        tile.addEventListener('animationiteration', function (e) {
+          if (e.target !== tile) return;
+          var src = images[(Math.round(e.elapsedTime / duration) * l.columns + first) % images.length];
+          for (var i = 0; i < pics.length; i++) if (pics[i].src !== src) pics[i].src = src;
+        });
+        band.appendChild(tile);
+      })(t);
+    }
+  }
+
+  new ResizeObserver(function (entries) {
+    var box = entries[0].contentRect, next = measure(box.width, box.height);
+    if (layout && layout.columns === next.columns && layout.sweep === next.sweep && layout.unit === next.unit) return;
+    layout = next; lay(next);
+    band.classList.add('is-laid');
+  }).observe(root);
+
+  return {
+    /* off screen the row holds still; it picks up where it stopped */
+    enter: function () { root.classList.remove('is-off'); },
+    leave: function () { root.classList.add('is-off'); },
+    progress: function () {},
+    step: function () {}
+  };
+}
+
+/* ============================================================================
+   THE STAGE — nothing scrolls natively. The wheel moves a number.
+
+   The page is a stack of scenes, each `height` screens long, joined end to
+   start so it runs in a circle. Three things happen to the number:
+     1. two low-passes and a speed limit turn the wheel into position,
+     2. where two scenes meet, a diagonal cut carries one over the other,
+     3. after 1.4 s of rest the page finishes the move on its own.
+   ========================================================================== */
+(function () {
+  var els = $$('.panel');
+  if (!els.length) return;
+
+  var MULT = 0.00075;              /* one wheel pixel, in screens */
+  var REST = 1.4;                  /* seconds of stillness before it centres itself */
+  var SLOPE = 0.2, PARALLAX = 0.4; /* the cut: how steep, and how far the scenes slide */
+
+  var scroll = { total: 0, targetY1: 0, targetY2: 0, y: 0, velocity: 0 };
+  /* the page is a line, not a circle: it starts at the first scene and ends at
+     the last place the last one rests */
+  var cap = Infinity;
+  var auto = { needed: false, animating: false, lastTarget: 0, lastTime: 0 };
+  var glide = null, now = 0, ratio = 1;
+  /* which way the hand last pushed: +1 down the page, -1 back up. Left alone,
+     the page finishes the move in that direction — it never pulls back against it. */
+  var heading = 0;
+
+  var build = { tilt: tiltDriver, ice: typeof GDIce !== 'undefined' ? GDIce.create : null };
+
+  var scenes = els.map(function (el) {
+    var fn = build[el.getAttribute('data-panel')];
+    return {
+      el: el,
+      height: Math.max(1, parseFloat(el.getAttribute('data-height')) || 2),
+      /* places inside the scene where it comes to rest, 0 = just arrived, 1 = about to leave */
+      stops: (el.getAttribute('data-stops') || '').split(',').filter(Boolean).map(Number),
+      /* a raw scene reads the whole 0..1, hand-overs included */
+      raw: el.hasAttribute('data-raw'),
+      /* a driver that has its own idea of where to rest gets the glide to do it with */
+      driver: fn ? fn(el, scroll, centerScroll) : { progress: function () {}, step: function () {} },
+      top: 0, bottom: 0, progress: 0, visible: false, shown: false
+    };
+  });
+
+  /* frame-rate independent smoothing: the same feel at 60 and at 144 Hz */
+  function damp(k) { return 1 - Math.exp(Math.log(1 - k) * ratio); }
+  function lerpFPS(a, b, k) { return a + (b - a) * damp(k); }
+  function lerpFPSLimited(a, b, k, max) {
+    var m = max * ratio;
+    return a + clamp(lerpFPS(a, b, k) - a, -m, m);
+  }
+  function round2(v) { return Math.round(v * 100) / 100; }
+  function wrap(v) { var s = v % scroll.total; return s < 0 ? s + scroll.total : s; }
+
+  /* cubic-bezier(.6, 0, 0, 1): leaves slowly, arrives slowly */
+  function inOut3(t) {
+    var u = t;
+    for (var i = 0; i < 8; i++) {
+      var x = 1.8 * (1 - u) * (1 - u) * u + u * u * u - t;
+      var dx = 1.8 * (1 - u) * (1 - u) - 3.6 * (1 - u) * u + 3 * u * u;
+      if (Math.abs(dx) < 1e-6) break;
+      u = clamp01(u - x / dx);
+    }
+    return 3 * (1 - u) * u * u + u * u * u;
+  }
+
+  function centerScroll(to, dur) {
+    glide = { from: scroll.y, to: round2(clamp(to, 0, cap)), t0: now, dur: dur };
+    auto.animating = true;
+  }
+  function stopAutoCenter() {
+    if (auto.animating) { glide = null; auto.animating = false; }
+  }
+
+  /* inside one scene: go on to the next place it rests, or failing that the nearest */
+  function centreOnStop(s) {
+    if (!s.stops.length) return;
+    var u = s.progress * (s.height + 1) - 1, best = Infinity, d = 0, on = null;
+    s.stops.forEach(function (p) {
+      var q = p * (s.height - 1) - u;
+      if (Math.abs(q) < best) { best = Math.abs(q); d = q; }
+      if (q * heading > 0.004 && (on === null || Math.abs(q) < Math.abs(on))) on = q;
+    });
+    if (on !== null) d = on; else if (best < 0.004) return;
+    centerScroll(scroll.y + d, clamp(Math.abs(d) * 6, 1.6, 2.4));
+  }
+
+  /* between two scenes: the hand-over is finished the way it was begun. Only
+     with no push to go by does the nearer edge win. */
+  function centreOnEdge(o, l) {
+    var A = wrap(scroll.targetY2), B = (A + 1) % scroll.total;
+    var top = A > B ? A - scroll.total : A, edges = [top, top + 1];
+    if (heading && l !== null) {
+      var whole = scenes[l].top - top;             /* the scene coming in takes the whole screen */
+      /* a scene that rests somewhere other than its very edge is glided into
+         as far as that place, a little longer for the extra way */
+      var into = heading > 0 ? scenes[l] : scenes[o === null ? l : o], ends = into.driver.ends, more = 0;
+      if (ends) more = heading > 0 ? ends[0] : into.height - 1 - ends[1];
+      centerScroll(scroll.targetY2 + (heading > 0 ? whole + more : whole - 1 - more), 2 + more * 2);
+      return;
+    }
+    var best = Infinity, v = 0;
+    [o, l].forEach(function (k) {
+      if (k === null) return;
+      [scenes[k].top, scenes[k].bottom].forEach(function (e) {
+        edges.forEach(function (s) {
+          if (Math.abs(e - s) < best) { best = Math.abs(e - s); v = e - s; }
+        });
+      });
+    });
+    if (v !== 0) centerScroll(scroll.targetY2 + v, 2);
+  }
+
+  /* the hand-over: a diagonal that climbs the screen. Below it the next scene,
+     above it the last one, and both slide against each other as it passes. */
+  function paint(o, l, c) {
+    var W = innerWidth, H = innerHeight;
+    var slope = SLOPE * W / H, front = c * (1 + slope);
+    var yL = (1 - front) * H, yR = (1 - front + slope) * H;
+
+    /* a scene that brings its own cut lies over the whole of the one before
+       it and opens itself; that one is not clipped, it only slides, by the
+       same measure igloo's cut slides its upper scene */
+    var own = l !== null && scenes[l].driver.cuts;
+
+    for (var i = 0; i < scenes.length; i++) {
+      var s = scenes[i], el = s.el;
+      if (!s.visible) {
+        if (s.shown) {
+          s.shown = false;
+          el.classList.remove('is-live');
+          el.style.opacity = '0'; el.style.clipPath = ''; el.style.transform = ''; el.style.zIndex = '';
+          if (s.driver.leave) s.driver.leave();
+        }
+        continue;
+      }
+      if (!s.shown) {
+        s.shown = true;
+        el.classList.add('is-live');
+        el.style.opacity = '1';
+        if (s.driver.enter) s.driver.enter();
+      }
+      if (o === null || l === null) {
+        el.style.clipPath = ''; el.style.transform = ''; el.style.zIndex = '';
+        continue;
+      }
+      if (own) {
+        el.style.clipPath = '';
+        el.style.zIndex = i === l ? '2' : '1';
+        el.style.transform = i === l ? '' : 'translate3d(0,' + (-PARALLAX * c * c * c * H).toFixed(2) + 'px,0)';
+        continue;
+      }
+      /* the clip travels with the element, so the slide is taken back out of it */
+      var T = i === l ? PARALLAX * Math.pow(1 - c, 3) * H : -PARALLAX * c * c * c * H;
+      el.style.transform = 'translate3d(0,' + T.toFixed(2) + 'px,0)';
+      el.style.zIndex = i === l ? '2' : '1';
+      el.style.clipPath = i === l
+        ? 'polygon(0px ' + (yL - T).toFixed(1) + 'px,100% ' + (yR - T).toFixed(1) + 'px,100% 300%,0px 300%)'
+        : 'polygon(0px -200%,100% -200%,100% ' + (yR - T).toFixed(1) + 'px,0px ' + (yL - T).toFixed(1) + 'px)';
+    }
+  }
+
+  function frame(dt, t) {
+    now = t / 1000;
+    ratio = Math.min(5, dt * 60);
+
+    if (glide) {
+      var k = glide.dur > 0 ? clamp01((now - glide.t0) / glide.dur) : 1;
+      scroll.y = glide.from + (glide.to - glide.from) * inOut3(k);
+      scroll.targetY1 = scroll.targetY2 = auto.lastTarget = scroll.y;
+      if (k >= 1) { glide = null; auto.animating = false; }
+    }
+
+    scroll.total = 0;
+    scenes.forEach(function (s) { s.top = scroll.total; s.bottom = s.top + s.height; scroll.total += s.height; });
+    /* a scene that is still loading is not there yet: the page ends before it */
+    var last = scenes[scenes.length - 1];
+    for (var w = scenes.length - 1; w > 0; w--) {
+      if (scenes[w].driver.waits && scenes[w].driver.waits()) last = scenes[w - 1];
+    }
+    cap = last.top + (last.driver.ends ? last.driver.ends[1] : last.height - 1);
+    scroll.targetY2 = clamp(scroll.targetY2, 0, cap);
+
+    if (scroll.targetY2 !== auto.lastTarget) {
+      auto.needed = true; auto.lastTarget = scroll.targetY2; auto.lastTime = now;
+    }
+
+    /* wheel -> target -> eased target -> position, and never more than
+       half a screen ahead of where the page really is */
+    var before = scroll.y, lead = 750 * MULT;
+    scroll.targetY1 = lerpFPSLimited(scroll.targetY1, scroll.targetY2, 0.075, 100 * MULT);
+    scroll.y = lerpFPS(scroll.y, scroll.targetY1, 0.15);
+    scroll.targetY2 = clamp(clamp(scroll.targetY2, scroll.y - lead, scroll.y + lead), 0, cap);
+    if (Math.abs(scroll.y - scroll.targetY2) < 0.1 * MULT) {
+      scroll.y = scroll.targetY2; scroll.targetY1 = scroll.targetY2;
+    }
+    scroll.velocity += Math.abs(scroll.y - before);
+    scroll.velocity *= Math.exp(Math.log(0.98) * ratio);
+    scroll.velocity = clamp(scroll.velocity, 0, 1);
+    if (scroll.velocity < 0.001) scroll.velocity = 0;
+
+    /* the screen is one unit tall: its top edge sits in one scene, its bottom
+       edge possibly already in the next */
+    var n = wrap(scroll.y), r = n + 1, a = r % scroll.total;
+    var m = round2(n), g = round2(a), o = null, l = null, c = 0;
+    scenes.forEach(function (s, i) {
+      var holdsTop = m >= s.top && m < s.bottom, holdsBottom = g > s.top && g <= s.bottom;
+      s.visible = holdsTop || holdsBottom;
+      if (!s.visible) return;
+      s.progress = ((holdsTop ? r : a) - s.top) / (s.height + 1);
+      if (holdsTop) o = i; else { l = i; c = a - s.top; }
+    });
+
+    paint(o, l, c);
+
+    if (auto.needed && !auto.animating && now - auto.lastTime > REST) {
+      auto.needed = false;
+      if (c % 1 !== 0) centreOnEdge(o, l);
+      else if (o !== null && !(scenes[o].driver.rest && scenes[o].driver.rest(heading))) centreOnStop(scenes[o]);
+    }
+
+    scenes.forEach(function (s) {
+      if (!s.visible) return;
+      var d = s.driver;
+      if (d.progress) {
+        d.progress(s.raw ? s.progress
+                         : clamp01((s.progress * (s.height + 1) - 1) / Math.max(s.height - 1, 1e-4)));
+      }
+      if (d.step) d.step(dt);
+    });
+  }
+
+  /* ---- input: wheel, arrows, finger ----------------------------------- */
+  /* Whatever moves the page says it in the same words — so many wheel pixels
+     down it — and takes the same way from there: the same two low-passes, the
+     same speed limit, the same wait before the page finishes the move. A finger
+     is a wheel that is held. */
+  function push(pixels) {
+    stopAutoCenter();
+    if (pixels) heading = pixels > 0 ? 1 : -1;
+    scroll.targetY2 += pixels * MULT;
+  }
+
+  /* on the way down, not up: the ice canvas stops every wheel event it gets
+     from bubbling, and the page would stand still under the cursor */
+  addEventListener('wheel', function (e) {
+    if (e.ctrlKey) return;                       /* pinch-zoom stays the browser's */
+    e.preventDefault();
+    var dy = e.deltaY;
+    if (e.deltaMode === 1) dy *= 33; else if (e.deltaMode === 2) dy *= innerHeight;
+    push(dy);
+  }, { passive: false, capture: true });
+
+  addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+    var dir = /^(ArrowDown|PageDown)$/.test(e.key) ? 1 : /^(ArrowUp|PageUp)$/.test(e.key) ? -1 : 0;
+    if (!dir) return;
+    e.preventDefault();
+    push(dir * 150);
+  });
+
+  /* igloo's own measure for a finger or a held mouse: once up the screen is a
+     screen and a quarter */
+  var dragId = null, dragY = 0;
+  addEventListener('pointerdown', function (e) {
+    if (dragId !== null || e.button) return;
+    if (e.target.closest && e.target.closest('a,button,input,textarea,.mq__stage,[data-nodrag]')) return;
+    dragId = e.pointerId; dragY = e.clientY;
+  });
+  addEventListener('pointermove', function (e) {
+    if (e.pointerId !== dragId) return;
+    push((dragY - e.clientY) / innerHeight * 1.25 / MULT);
+    dragY = e.clientY;
+  });
+  function endDrag(e) { if (e.pointerId === dragId) dragId = null; }
+  addEventListener('pointerup', endDrag);
+  addEventListener('pointercancel', endDrag);
+
+  addEventListener('resize', function () {
+    stopAutoCenter();
+    scroll.targetY2 = scroll.targetY1 = scroll.y;
+    auto.lastTarget = Infinity;                  /* re-centres once the window settles */
+  }, { passive: true });
+
+  frame(0, performance.now());
+  onTick(frame);
+
+  window.GDStage = { scroll: scroll, scenes: scenes, centerScroll: centerScroll };
+})();
+
+
+/* ============================================================================
+   LOSLEGEN
+   No hop to another site: the page clears to white and the Inner Circle opens
+   on the same white.
+   ========================================================================== */
+(function () {
+  var go = $('.go'); if (!go) return;
+  go.addEventListener('click', function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    e.preventDefault();
+    document.documentElement.classList.add('is-leaving');
+    setTimeout(function () { location.href = go.getAttribute('href'); }, REDUCED ? 0 : 560);
+  });
+  /* coming back through the history must not find the page cleared */
+  addEventListener('pageshow', function () { document.documentElement.classList.remove('is-leaving'); });
+})();
+
+/* ============================================================================
+   LOADER
+   The curtain stays down until the ice is warm, so the first cut into it is
+   never a cut into nothing — but never less than a beat. A phone may need a
+   while to build the scenes; the ice itself stops waiting after twenty seconds.
+   And it does not simply lift: the ice opens it from the middle with its own
+   cut, bent into a circle, and the hero comes up through the opening.
+   ========================================================================== */
+(function () {
+  var pre = $('#pre'); if (!pre) return;
+  var done = false, t0 = performance.now(), BEAT = REDUCED ? 200 : 1100, LONGEST = 24000;
+  var DEPTH = 0.3;                 /* how far back the hero starts, as a share of its size */
+  function lift(dur) {
+    document.body.classList.remove('is-loading');
+    /* GSAP's power2.inOut, as the browser's own curve */
+    if (!REDUCED && pre.animate) {
+      pre.animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 1000, easing: 'cubic-bezier(.455,.03,.515,.955)', fill: 'forwards' })
+        .onfinish = function () { pre.style.display = 'none'; };
+    } else { pre.style.display = 'none'; }
+  }
+  /* the way in (src/ice/ice.js) — false where there is none to take */
+  function dive() {
+    var hero = $('.tilt'), ice = null;
+    if (REDUCED || !hero || !window.GDStage) return false;
+    GDStage.scenes.forEach(function (s) { if (s.driver.plunge) ice = s.driver; });
+    return !!ice && ice.plunge({
+      /* the canvas under the curtain is the same white: only the mark is seen to go */
+      begin: function () { lift(0.3); },
+      step: function (q) { hero.style.transform = 'scale(' + (1 - DEPTH * (1 - q) * (1 - q)).toFixed(4) + ')'; },
+      end: function () { hero.style.transform = ''; }
+    });
+  }
+  function open() {
+    if (done) return; done = true;
+    if (!dive()) lift(0.7);
+  }
+  function warm() { setTimeout(open, Math.max(0, BEAT - (performance.now() - t0))); }
+  if (window.GDIceSettled || typeof GDIce === 'undefined') warm();
+  else addEventListener('gd:ice-settled', warm, { once: true });
+  /* last resort, should the ice never say anything at all: no tween, no frames
+     needed — just take it away */
+  setTimeout(function () {
+    if (done) return;
+    done = true;
+    document.body.classList.remove('is-loading');
+    pre.style.display = 'none';
+  }, LONGEST);
+})();
+
+})();
+</script>
+
+</body>
+</html>
